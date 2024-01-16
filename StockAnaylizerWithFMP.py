@@ -66,17 +66,8 @@ def plot_stock_data(date_close_dict, ticker):
 
     plt.show()
 
-def anaylize(data_close_dict):
+def anaylize(dict):
 # make algorithem to itirte through the dictinary and find ROI
-    for close_price in data_close_dict:
-        ROI = (getClosePrice(start_date) - getClosePrice(end_date) / getClosePrice(start_date)) * 100
-        print(ROI)
-
-def isEfficient(ROI):
-    if ROI > 0:
-        print("This stock has had positive return in the longrun. Therefore it is an efficient investment")
-    else:
-        print('This stock has had negative returns in the long run. Therefore it is innefficient')
 
 
 
