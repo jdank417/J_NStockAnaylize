@@ -1,4 +1,6 @@
 # b5dd9bbe937d64ec8c81be6fb999a2ed
+# @Author Jason Dank
+# @Author Nico Bonanno
 
 import json
 from urllib.request import urlopen
