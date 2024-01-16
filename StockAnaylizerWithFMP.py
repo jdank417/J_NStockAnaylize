@@ -6,6 +6,7 @@ import json
 from urllib.request import urlopen
 import pandas as pd
 import matplotlib.pyplot as plt
+from datetime import datetime
 
 start_date = "2023-10-01"
 end_date = "2023-11-01"
@@ -67,6 +68,25 @@ def plot_stock_data(date_close_dict, ticker):
     plt.show()
 
 
+def get_close_price(date_close_dict, target_date):
+    # Try to find the close price for the exact target date
+    close_price = date_close_dict.get(target_date, None)
+
+    if close_price is not None:
+        return close_price
+
+    # If not found, try to find the close price for a similar date (ignoring the time component)
+    try:
+        target_date_dt = datetime.strptime(target_date, '%Y-%m-%d').date()
+        for date, price in date_close_dict.items():
+            if date == target_date_dt:  # Directly compare date objects
+                return price
+    except ValueError:
+        pass
+
+    # If still not found, return "Date not found"
+    return "Date not found"
+
 
 
 
@@ -90,6 +110,15 @@ def main():
 
         # Plot the stock data
         plot_stock_data(date_close_dict, ticker)
+
+        # Get close price for a specific date
+        target_date = input("Enter the date to get the close price (YYYY-MM-DD): ")
+        close_price = get_close_price(date_close_dict, target_date)
+
+        if close_price != "Date not found":
+            print(f"Close Price for {target_date}: {close_price}")
+        else:
+            print(f"No data found for the specified date.")
 
         # Iterate over the data structure for analysis
         for date, close_price in date_close_dict.items():
