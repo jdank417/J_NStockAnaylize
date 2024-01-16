@@ -67,7 +67,7 @@ def plot_stock_data(date_close_dict, ticker):
     plt.show()
 
 def anaylize(dict):
-    #make algorithem to itirte through the dictinary and find ROI
+# make algorithem to itirte through the dictinary and find ROI
 
 
 
