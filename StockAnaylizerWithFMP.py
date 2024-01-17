@@ -17,8 +17,6 @@ ticker = input("Enter Stock Ticker: ")
 User_Start_Date = input("Enter Date of Purchase: ")
 User_End_Date = input("Enter Current Date: ")
 
-
-
 def get_jsonparsed_data(url):
    try:
        res = urlopen(url)
@@ -47,8 +45,6 @@ def fetch_data_chunks(ticker, start_date, end_date, api_key):
 
 
    return all_data
-
-
 
 def create_data_structure(data):
    date_close_dict = {}
@@ -96,7 +92,6 @@ def plot_stock_data(date_close_dict, ticker):
    plt.show()
 
 
-
 def get_close_price(date_close_dict, target_date):
    # Try to find the close price for the exact target date
    close_price = date_close_dict.get(target_date, None)
@@ -119,6 +114,7 @@ def get_close_price(date_close_dict, target_date):
    # If still not found, return "Date not found"
    return "Date not found"
 
+
 def getroi(date_close_dict):
     endDate = get_close_price(date_close_dict, User_End_Date)
     startDate = get_close_price(date_close_dict, User_Start_Date)
@@ -131,6 +127,24 @@ def getefficiency(date_close_dict, sp500_dict):
         print("This stock is performing worse than the S&P500. Therefore, it is currently an inefficient investment")
     else:
         print("This stock is performing on par or better than the S&P500. Therefore, it is currently an efficient investment")
+
+
+def get_dividend(ticker, api_key):
+    try:
+        url = f"https://financialmodelingprep.com/api/v3/historical-price-full/stock_dividend/{ticker}?apikey={api_key}"
+        data = get_jsonparsed_data(url)
+
+        if 'historical' in data:
+            dividends_data = data['historical']
+            dividends_info = [(dividend['date'], dividend['adjDividend']) for dividend in dividends_data]
+            return dividends_info
+
+        print(f"No dividend data found for {ticker}.")
+        return None
+
+    except Exception as e:
+        print(f"Error fetching dividend data: {e}")
+        return None
 
 
 def main():
@@ -180,6 +194,12 @@ def main():
    print('Daily Close Prices for VOO (Vanguard S&P500 Fund):')
    for date, close_price in sp500_dict.items():
            print(f"Date: {date}, Close Price: {close_price}")
+
+   # print div data for ticker
+   dividend = get_dividend(ticker, api_key)
+   print('')
+   if dividend is not None:
+       print(f"Dividend for {ticker}: {dividend}")
 
 
 if __name__ == "__main__":
