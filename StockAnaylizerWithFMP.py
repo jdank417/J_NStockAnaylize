@@ -1,23 +1,21 @@
 # b5dd9bbe937d64ec8c81be6fb999a2ed
 # @Author Jason Dank
 # @Author Nico Bonanno
-#Hey
+
 import json
 from urllib.request import urlopen
 import pandas as pd
 import matplotlib.pyplot as plt
 from datetime import datetime
-
 from numpy import double
 
+# Constants
 start_date = "2023-10-01"
 end_date = "2023-11-01"
 api_key = "b5dd9bbe937d64ec8c81be6fb999a2ed"
-
 ticker = input("Enter Stock Ticker: ")
 User_Start_Date = input("Enter Date of Purchase: ")
 User_End_Date = input("Enter Current Date: ")
-
 
 
 
@@ -29,8 +27,6 @@ def get_jsonparsed_data(url):
    except Exception as e:
        print(f"Error fetching data: {e}")
        return None
-
-
 
 
 def fetch_data_chunks(ticker, start_date, end_date, api_key):
@@ -53,9 +49,9 @@ def fetch_data_chunks(ticker, start_date, end_date, api_key):
    return all_data
 
 
+
 def create_data_structure(data):
    date_close_dict = {}
-
 
    for entry in data:
        date = entry['date']
@@ -64,6 +60,7 @@ def create_data_structure(data):
 
 
    return date_close_dict
+
 
 def sp500_dictionary(compData):
     sp500_dict = {}
@@ -100,7 +97,6 @@ def plot_stock_data(date_close_dict, ticker):
 
 
 
-
 def get_close_price(date_close_dict, target_date):
    # Try to find the close price for the exact target date
    close_price = date_close_dict.get(target_date, None)
@@ -129,6 +125,7 @@ def getroi(date_close_dict):
     roi = ((endDate - startDate) / startDate)*100
     return roi
 
+
 def getefficiency(date_close_dict, sp500_dict):
     if(getroi(sp500_dict) > getroi(date_close_dict)):
         print("This stock is performing worse than the S&P500. Therefore, it is currently an inefficient investment")
@@ -139,32 +136,17 @@ def getefficiency(date_close_dict, sp500_dict):
 def main():
 
    data = fetch_data_chunks(ticker, start_date, end_date, api_key)
-   compData = fetch_data_chunks('voo', start_date, end_date, api_key)
+   compData = fetch_data_chunks('VOO', start_date, end_date, api_key)
 
 
    if data:
        df = pd.DataFrame(data)
-       df['date'] = pd.to_datetime(df['date']).dt.date  # Convert 'date' column to datetime and extract date component
-
-
-       # Filter the DataFrame based on the user's specified date range
+       df['date'] = pd.to_datetime(df['date']).dt.date
        df_filtered = df[(df['date'] >= pd.to_datetime(start_date).date()) & (df['date'] <= pd.to_datetime(end_date).date())]
-
-
-       # Create a data structure with date and close price
        date_close_dict = create_data_structure(df_filtered.to_dict('records'))
-
-
-       # Plot the stock data
        plot_stock_data(date_close_dict, ticker)
-
-
-       # Get close price for start day
        close_price_start = get_close_price(date_close_dict, User_Start_Date)
-
-       # Get close price for end day
        close_price_end = get_close_price(date_close_dict, User_End_Date)
-
 
        if close_price_start != "Date not found":
            print(f"Close Price for {User_Start_Date}: {close_price_start}")
@@ -176,29 +158,27 @@ def main():
        else:
            print(f"No data found for the specified date.")
 
-
        if compData:
            df = pd.DataFrame(compData)
-           df['date'] = pd.to_datetime(
-               df['date']).dt.date  # Convert 'date' column to datetime and extract date component
-
-           # Filter the DataFrame based on the user's specified date range
-           df_filtered = df[
-               (df['date'] >= pd.to_datetime(start_date).date()) & (df['date'] <= pd.to_datetime(end_date).date())]
-
-           # Create a data structure with date and close price
+           df['date'] = pd.to_datetime(df['date']).dt.date
+           df_filtered = df[(df['date'] >= pd.to_datetime(start_date).date()) & (df['date'] <= pd.to_datetime(end_date).date())]
            sp500_dict = sp500_dictionary(df_filtered.to_dict('records'))
-
-           # Now, 'date_close_dict' contains date as keys and close price as values
-
-           # Plot the stock data
-           plot_stock_data(sp500_dict, 'voo')
+           plot_stock_data(sp500_dict, 'VOO')
 
    print('ROI for',ticker,':',getroi(date_close_dict), '%')
    print('ROI for VOO (Vanguard S&P500 Fund): ', getroi(sp500_dict), '%')
    getefficiency(date_close_dict, sp500_dict)
 
+   # print date_close_dict
+   print('')
+   print('Daily Close Prices for', ticker, ':')
    for date, close_price in date_close_dict.items():
+           print(f"Date: {date}, Close Price: {close_price}")
+
+   # print date_close_dict
+   print('')
+   print('Daily Close Prices for VOO (Vanguard S&P500 Fund):')
+   for date, close_price in sp500_dict.items():
            print(f"Date: {date}, Close Price: {close_price}")
 
 
