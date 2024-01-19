@@ -137,7 +137,8 @@ def get_dividend(ticker, api_key):
         if 'historical' in data:
             dividends_data = data['historical']
             dividends_info = [(dividend['date'], dividend['adjDividend']) for dividend in dividends_data]
-            return dividends_info
+            div_dict = dict(dividends_info)
+            return div_dict
 
         print(f"No dividend data found for {ticker}.")
         return None
@@ -151,6 +152,7 @@ def main():
 
    data = fetch_data_chunks(ticker, start_date, end_date, api_key)
    compData = fetch_data_chunks('VOO', start_date, end_date, api_key)
+   divData = get_dividend(ticker, api_key)
 
 
    if data:
@@ -161,6 +163,15 @@ def main():
        plot_stock_data(date_close_dict, ticker)
        close_price_start = get_close_price(date_close_dict, User_Start_Date)
        close_price_end = get_close_price(date_close_dict, User_End_Date)
+
+       if divData:
+           df = pd.DataFrame(data)
+           df['date'] = pd.to_datetime(df['date']).dt.date
+           div_Dict = get_dividend(ticker, api_key)
+           plot_stock_data(div_Dict, ticker)
+
+
+
 
        if close_price_start != "Date not found":
            print(f"Close Price for {User_Start_Date}: {close_price_start}")
@@ -189,17 +200,17 @@ def main():
    for date, close_price in date_close_dict.items():
            print(f"Date: {date}, Close Price: {close_price}")
 
-   # print date_close_dict
+   # print sp500_dict
    print('')
    print('Daily Close Prices for VOO (Vanguard S&P500 Fund):')
    for date, close_price in sp500_dict.items():
            print(f"Date: {date}, Close Price: {close_price}")
 
-   # print div data for ticker
-   dividend = get_dividend(ticker, api_key)
+   # print div_dict
    print('')
-   if dividend is not None:
-       print(f"Dividend for {ticker}: {dividend}")
+   print(f'Dividend data for {ticker}:')
+   for date, div_Data in div_Dict.items():
+       print(f"Date: {date}, div_Data: {div_Data}")
 
 
 if __name__ == "__main__":
