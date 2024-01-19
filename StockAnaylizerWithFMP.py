@@ -19,9 +19,9 @@ User_End_Date = input("Enter Current Date: ")
 
 def get_jsonparsed_data(url):
    try:
-       res = urlopen(url)
-       data = res.read().decode("utf-8")
-       return json.loads(data)
+       open_url = urlopen(url)
+       url_data = open_url.read().decode("utf-8")
+       return json.loads(url_data)
    except Exception as e:
        print(f"Error fetching data: {e}")
        return None
@@ -33,12 +33,12 @@ def fetch_data_chunks(ticker, start_date, end_date, api_key):
 
    while start_date < end_date:
        chunk_end_date = (pd.to_datetime(start_date) + pd.DateOffset(months=1)).strftime('%Y-%m-%d')
-       url = f"https://financialmodelingprep.com/api/v3/historical-chart/30min/{ticker}?from={start_date}&to={chunk_end_date}&apikey={api_key}"
-       data = get_jsonparsed_data(url)
+       close_price_url = f"https://financialmodelingprep.com/api/v3/historical-chart/30min/{ticker}?from={start_date}&to={chunk_end_date}&apikey={api_key}"
+       json_data = get_jsonparsed_data(close_price_url)
 
 
-       if data:
-           all_data.extend(data)
+       if json_data:
+           all_data.extend(json_data)
 
 
        start_date = chunk_end_date
@@ -46,10 +46,10 @@ def fetch_data_chunks(ticker, start_date, end_date, api_key):
 
    return all_data
 
-def create_data_structure(data):
+def close_price_dictionary(close_price_data):
    date_close_dict = {}
 
-   for entry in data:
+   for entry in close_price_data:
        date = entry['date']
        close_price = double(entry['close'])
        date_close_dict[date] = close_price
@@ -58,25 +58,35 @@ def create_data_structure(data):
    return date_close_dict
 
 
-def sp500_dictionary(compData):
+def sp500_dictionary(sp500_data):
     sp500_dict = {}
 
-    for entry in compData:
+    for entry in sp500_data:
         date = entry['date']
         close_price = double(entry['close'])
         sp500_dict[date] = close_price
 
     return sp500_dict
 
+def volume_dictionary(close_price_data):
+    volume_dict = {}
+
+    for entry in close_price_data:
+        date = entry['date']
+        volume = double(entry['volume'])
+        volume_dict[date] = volume
+
+    return volume_dict
+
 
 def plot_stock_data(date_close_dict, ticker):
-   dates = list(date_close_dict.keys())
-   close_prices = list(date_close_dict.values())
+   date_list = list(date_close_dict.keys())
+   close_price_list = list(date_close_dict.values())
 
 
    plt.figure(figsize=(20, 8))
-   date_column = pd.to_datetime(dates).date  # Extract only the date component
-   plt.plot(date_column, close_prices, label=f'{ticker} Close Price', color='blue')
+   date_column = pd.to_datetime(date_list).date  # Extract only the date component
+   plt.plot(date_column, close_price_list, label=f'{ticker} Close Price', color='blue')
    plt.title(f'{ticker} Close Price Chart for ' + start_date + " - " + end_date)
    plt.xlabel('Date')
    plt.ylabel('Close Price')
@@ -131,12 +141,12 @@ def getefficiency(date_close_dict, sp500_dict):
 
 def get_dividend(ticker, api_key):
     try:
-        url = f"https://financialmodelingprep.com/api/v3/historical-price-full/stock_dividend/{ticker}?apikey={api_key}"
-        data = get_jsonparsed_data(url)
+        div_url = f"https://financialmodelingprep.com/api/v3/historical-price-full/stock_dividend/{ticker}?apikey={api_key}"
+        div_data = get_jsonparsed_data(div_url)
 
-        if 'historical' in data:
-            dividends_data = data['historical']
-            dividends_info = [(dividend['date'], dividend['adjDividend']) for dividend in dividends_data]
+        if 'historical' in div_data:
+            dividends_history = div_data['historical']
+            dividends_info = [(dividend['date'], dividend['adjDividend']) for dividend in dividends_history]
             div_dict = dict(dividends_info)
             return div_dict
 
@@ -150,27 +160,32 @@ def get_dividend(ticker, api_key):
 
 def main():
 
-   data = fetch_data_chunks(ticker, start_date, end_date, api_key)
-   compData = fetch_data_chunks('VOO', start_date, end_date, api_key)
+   closeData = fetch_data_chunks(ticker, start_date, end_date, api_key)
+   sp500Data = fetch_data_chunks('VOO', start_date, end_date, api_key)
    divData = get_dividend(ticker, api_key)
+   volumeData = fetch_data_chunks(ticker, start_date, end_date, api_key)
 
 
-   if data:
-       df = pd.DataFrame(data)
+   if closeData:
+       df = pd.DataFrame(closeData)
        df['date'] = pd.to_datetime(df['date']).dt.date
        df_filtered = df[(df['date'] >= pd.to_datetime(start_date).date()) & (df['date'] <= pd.to_datetime(end_date).date())]
-       date_close_dict = create_data_structure(df_filtered.to_dict('records'))
+       date_close_dict = close_price_dictionary(df_filtered.to_dict('records'))
        plot_stock_data(date_close_dict, ticker)
        close_price_start = get_close_price(date_close_dict, User_Start_Date)
        close_price_end = get_close_price(date_close_dict, User_End_Date)
 
        if divData:
-           df = pd.DataFrame(data)
+           df = pd.DataFrame(closeData)
            df['date'] = pd.to_datetime(df['date']).dt.date
            div_Dict = get_dividend(ticker, api_key)
            plot_stock_data(div_Dict, ticker)
 
-
+       if volumeData:
+           df = pd.DataFrame(closeData)
+           df['date'] = pd.to_datetime(df['date']).dt.date
+           volume_Dict = volume_dictionary(df_filtered.to_dict('records'))
+           plot_stock_data(volume_Dict, ticker)
 
 
        if close_price_start != "Date not found":
@@ -183,8 +198,8 @@ def main():
        else:
            print(f"No data found for the specified date.")
 
-       if compData:
-           df = pd.DataFrame(compData)
+       if sp500Data:
+           df = pd.DataFrame(sp500Data)
            df['date'] = pd.to_datetime(df['date']).dt.date
            df_filtered = df[(df['date'] >= pd.to_datetime(start_date).date()) & (df['date'] <= pd.to_datetime(end_date).date())]
            sp500_dict = sp500_dictionary(df_filtered.to_dict('records'))
@@ -211,6 +226,12 @@ def main():
    print(f'Dividend data for {ticker}:')
    for date, div_Data in div_Dict.items():
        print(f"Date: {date}, div_Data: {div_Data}")
+
+   # print volume_dict
+   print('')
+   print(f'Volume data for {ticker}:')
+   for date, volumeData in volume_Dict.items():
+       print(f"Date: {date}, volume_Data: {volumeData}")
 
 
 if __name__ == "__main__":
