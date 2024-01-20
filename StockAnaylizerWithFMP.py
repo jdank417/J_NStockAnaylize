@@ -14,8 +14,8 @@ start_date = "2023-10-01"
 end_date = "2023-11-01"
 api_key = "b5dd9bbe937d64ec8c81be6fb999a2ed"
 ticker = input("Enter Stock Ticker: ")
-User_Start_Date = input("Enter Date of Purchase: ")
-User_End_Date = input("Enter Current Date: ")
+User_Start_Date = "2023-10-06" #input("Enter Date of Purchase: ")
+User_End_Date = "2023-10-13" #input("Enter Current Date: ")
 
 def get_jsonparsed_data(url):
    try:
@@ -156,6 +156,18 @@ def get_dividend(ticker, api_key):
     except Exception as e:
         print(f"Error fetching dividend data: {e}")
         return None
+
+
+def get_close(symbol, start, end):
+
+    closeData = fetch_data_chunks(symbol, start, end, api_key)
+    if closeData:
+        df = pd.DataFrame(closeData)
+        df['date'] = pd.to_datetime(df['date']).dt.date
+        df_filtered = df[(df['date'] >= pd.to_datetime(start_date).date()) & (df['date'] <= pd.to_datetime(end_date).date())]
+        date_close_dict = close_price_dictionary(df_filtered.to_dict('records'))
+    return date_close_dict
+
 
 
 def main():
