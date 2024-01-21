@@ -29,20 +29,6 @@ def send_sms_via_email(
         email.sendmail(sender_email, receiver_email, email_message)
         print(f"SMS sent successfully to {number} via {provider}.")
 
-def send_test_email_to_sms_gateway(number: str, message: str, provider: str):
-    receiver_email = f'{number}@{PROVIDERS.get(provider).get("sms")}'
-    subject = "Test SMS"
-    sender_email = "your_email@gmail.com"  # Replace with your actual email
-    email_password = "your_email_password"  # Replace with your actual email password
-
-    email_message = f"Subject:{subject}\nTo:{receiver_email}\n{message}"
-
-    with smtplib.SMTP_SSL(
-        "smtp.gmail.com", 465, context=ssl.create_default_context()
-    ) as email:
-        email.login(sender_email, email_password)
-        email.sendmail(sender_email, receiver_email, email_message)
-        print(f"Test SMS sent successfully to {number} via {provider}.")
 
 def main():
     number = "6316038283"
