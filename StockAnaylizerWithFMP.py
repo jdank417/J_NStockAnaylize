@@ -8,7 +8,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from datetime import datetime
 from numpy import double
-import testing
+import J_N_SMS
 
 # Constants
 start_date = "2023-10-01"
@@ -234,7 +234,7 @@ def main():
 
             # Send each part separately
             for part in message_parts:
-                testing.send_sms_via_email(number, part, provider, sender_credentials)
+                J_N_SMS.send_sms_via_email(number, part, provider, sender_credentials)
 
             print(f"ROI sent successfully via SMS to {number}.")
 
@@ -246,7 +246,7 @@ def main():
             print(thank_you_message)
 
             # Send thank-you message
-            testing.send_sms_via_email(number, thank_you_message, provider, sender_credentials)
+            J_N_SMS.send_sms_via_email(number, thank_you_message, provider, sender_credentials)
             print(f"Thank-you message sent successfully via SMS to {number}.")
 
         except Exception as e:

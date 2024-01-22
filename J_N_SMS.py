@@ -31,7 +31,7 @@ def send_sms_via_email(
 
 
 def main():
-    number = "6316038283"
+    number = "6176787089"
     message = "Howdy Traders! Its me J&N Stock Analyze! Texting you from a python program!"
     provider = "Verizon"
 
