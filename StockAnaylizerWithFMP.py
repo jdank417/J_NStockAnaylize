@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 from numpy import double
 import J_N_SMS
+import J_N_SMTP
 
 # Constants
 start_date = "2023-10-01"
@@ -251,6 +252,15 @@ def main():
 
         except Exception as e:
             print(f"Error sending ROI and thank-you message via SMS: {e}")
+
+    # Send Data via Email
+    sender_email = 'jnstockanalyize@gmail.com'
+    app_password = 'tplr znil sobq eazj'
+    recipient_email = 'jasondank@yahoo.com'
+    email_subject = 'J&N Stock Analyze'
+    email_message = f"Your ROI for {ticker} is {getroi(date_close_dict)}%"
+    J_N_SMTP.send_email(sender_email, app_password, recipient_email, email_subject, email_message)
+
 
     # Print date_close_dict
     print('')
