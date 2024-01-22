@@ -1,4 +1,4 @@
-# b5dd9bbe937d64ec8c81be6fb999a2ed
+# API_Key: b5dd9bbe937d64ec8c81be6fb999a2ed
 # @Author Jason Dank
 # @Author Nico Bonanno
 
@@ -6,7 +6,9 @@ import json
 from urllib.request import urlopen
 import pandas as pd
 import matplotlib.pyplot as plt
-from datetime import datetime
+
+from datetime import datetime, timedelta
+
 from numpy import double
 import J_N_SMS
 import J_N_SMTP
@@ -176,6 +178,13 @@ def main():
     divData = get_dividend(ticker, api_key)
     volumeData = fetch_data_chunks(ticker, start_date, end_date, api_key)
 
+    # Send Data via Email
+    sender_email = 'jnstockanalyize@gmail.com'
+    app_password = 'tplr znil sobq eazj'
+    recipient_email = 'jasondank@yahoo.com'
+    email_subject = 'J&N Stock Analyze'
+    email_message = []
+
     if closeData:
         # Plot the stock data
         df = pd.DataFrame(closeData)
@@ -190,11 +199,13 @@ def main():
         # Print the close prices for the specified dates
         if close_price_start != "Date not found":
             print(f"Close Price for {User_Start_Date}: {close_price_start}")
+            email_message.append(f"Close Price for {User_Start_Date}: {close_price_start}")
         else:
             print(f"No data found for the specified date.")
 
         if close_price_end != "Date not found":
             print(f"Close Price for {User_End_Date}: {close_price_end}")
+            email_message.append(f"Close Price for {User_End_Date}: {close_price_end}")
         else:
             print(f"No data found for the specified date.")
 
@@ -204,6 +215,7 @@ def main():
             df['date'] = pd.to_datetime(df['date']).dt.date
             div_Dict = get_dividend(ticker, api_key)
             plot_stock_data(div_Dict, ticker)
+
 
         # Qualify VolumeData
         if volumeData:
@@ -225,6 +237,7 @@ def main():
         try:
             # Send ROI via SMS
             message_to_send_sms = f"Your ROI for {ticker} is {getroi(date_close_dict)}%"
+            email_message.append(message_to_send_sms)
 
             # Print the ROI message before sending
             print("ROI Message:")
@@ -253,13 +266,6 @@ def main():
         except Exception as e:
             print(f"Error sending ROI and thank-you message via SMS: {e}")
 
-    # Send Data via Email
-    sender_email = 'jnstockanalyize@gmail.com'
-    app_password = 'tplr znil sobq eazj'
-    recipient_email = 'jasondank@yahoo.com'
-    email_subject = 'J&N Stock Analyze'
-    email_message = f"Your ROI for {ticker} is {getroi(date_close_dict)}%"
-    J_N_SMTP.send_email(sender_email, app_password, recipient_email, email_subject, email_message)
 
 
     # Print date_close_dict
@@ -267,6 +273,7 @@ def main():
     print('Daily Close Prices for', ticker, ':')
     for date, close_price in date_close_dict.items():
         print(f"Date: {date}, Close Price: {close_price}")
+
 
     # Print sp500_dict
     print('')
@@ -285,6 +292,9 @@ def main():
     print(f'Volume data for {ticker}:')
     for date, volumeData in volume_Dict.items():
         print(f"Date: {date}, volume_Data: {volumeData}")
+
+
+    J_N_SMTP.send_email(sender_email, app_password, recipient_email, email_subject, str(email_message))
 
 
 if __name__ == "__main__":
