@@ -142,6 +142,7 @@ def get_dividend(ticker, api_key):
         div_url = f"https://financialmodelingprep.com/api/v3/historical-price-full/stock_dividend/{ticker}?apikey={api_key}"
         div_data = get_jsonparsed_data(div_url)
 
+
         if 'historical' in div_data:
             dividends_history = div_data['historical']
             dividends_info = [(dividend['date'], dividend['adjDividend']) for dividend in dividends_history]
@@ -154,6 +155,67 @@ def get_dividend(ticker, api_key):
     except Exception as e:
         print(f"Error fetching dividend data: {e}")
         return None
+
+
+from datetime import datetime
+
+
+def get_standardDeviation(ticker, api_key):
+    try:
+        stand_url = f"https://financialmodelingprep.com/api/v3/technical_indicator/1day/{ticker}?type=standardDeviation&period=10&apikey={api_key}"
+        stand_data = get_jsonparsed_data(stand_url)
+
+
+        if isinstance(stand_data, list) and stand_data:
+            stand_dict = {}
+
+
+            for entry in stand_data:
+                date_str = entry.get('date', None)
+                std_deviation = entry.get('standardDeviation', None)
+
+
+                if date_str is not None and std_deviation is not None:
+                    # Extract only the date part
+                    date = date_str.split()[0]
+
+
+                    stand_dict[date] = std_deviation
+                    print(f"Date: {date}, Standard Deviation: {std_deviation}")
+
+
+            if stand_dict:
+                return stand_dict
+
+
+        print(f"No stand data found for {ticker}.")
+        return None
+
+
+    except Exception as e:
+        print(f"Error fetching stand data: {e}")
+        return None
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 def get_close(symbol, start, end):
@@ -176,7 +238,9 @@ def main():
     closeData = fetch_data_chunks(ticker, start_date, end_date, api_key)
     sp500Data = fetch_data_chunks('VOO', start_date, end_date, api_key)
     divData = get_dividend(ticker, api_key)
+    stand_data = get_standardDeviation(ticker, api_key)
     volumeData = fetch_data_chunks(ticker, start_date, end_date, api_key)
+    stand_dict = {}
 
     # Send Data via Email
     sender_email = 'jnstockanalyize@gmail.com'
@@ -215,6 +279,10 @@ def main():
             df['date'] = pd.to_datetime(df['date']).dt.date
             div_Dict = get_dividend(ticker, api_key)
             plot_stock_data(div_Dict, ticker)
+
+        # Qualify Standard Deviation
+        if stand_data:
+            plot_stock_data(stand_data, ticker)
 
 
         # Qualify VolumeData
@@ -286,6 +354,12 @@ def main():
     print(f'Dividend data for {ticker}:')
     for date, div_Data in div_Dict.items():
         print(f"Date: {date}, div_Data: {div_Data}")
+
+    # Print stand_dict
+    print('')
+    print(f'stand data for {ticker}:')
+    for date, stand_data in stand_dict.items():
+        print(f"Date: {date}, stand_Data: {stand_data}")
 
     # Print volume_dict
     print('')
