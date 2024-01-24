@@ -9,12 +9,10 @@ def send_email(sender_email, app_password, recipient_email, subject, message):
     msg['To'] = recipient_email
     msg['Subject'] = subject
 
-    # Attach the message to the MIME
     msg.attach(MIMEText(message, 'plain'))
 
     print("Connecting to the SMTP server...")
     with smtplib.SMTP('smtp.gmail.com', 587) as server:
-        # Start TLS for security
         server.starttls()
 
         print("Logging in to Gmail account...")

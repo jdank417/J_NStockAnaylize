@@ -7,8 +7,6 @@ from urllib.request import urlopen
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from datetime import datetime, timedelta
-
 from numpy import double
 import J_N_SMS
 import J_N_SMTP
@@ -103,17 +101,16 @@ def plot_stock_data(date_close_dict, ticker):
 
 
 def get_close_price(date_close_dict, target_date):
-    # Try to find the close price for the exact target date
     close_price = date_close_dict.get(target_date, None)
 
     if close_price is not None:
         return int(close_price)
 
-    # If not found, try to find the close price for a similar date (ignoring the time component)
+    # If not found, try to find the close price for a surrounding date
     try:
         target_date_dt = datetime.strptime(target_date, '%Y-%m-%d').date()
         for date, price in date_close_dict.items():
-            if date == target_date_dt:  # Directly compare date objects
+            if date == target_date_dt:
                 return price
     except ValueError:
         pass
@@ -165,57 +162,24 @@ def get_standardDeviation(ticker, api_key):
         stand_url = f"https://financialmodelingprep.com/api/v3/technical_indicator/1day/{ticker}?type=standardDeviation&period=10&apikey={api_key}"
         stand_data = get_jsonparsed_data(stand_url)
 
-
         if isinstance(stand_data, list) and stand_data:
             stand_dict = {}
-
-
             for entry in stand_data:
                 date_str = entry.get('date', None)
                 std_deviation = entry.get('standardDeviation', None)
-
-
                 if date_str is not None and std_deviation is not None:
                     # Extract only the date part
                     date = date_str.split()[0]
-
-
                     stand_dict[date] = std_deviation
                     print(f"Date: {date}, Standard Deviation: {std_deviation}")
-
-
             if stand_dict:
                 return stand_dict
-
-
         print(f"No stand data found for {ticker}.")
         return None
-
 
     except Exception as e:
         print(f"Error fetching stand data: {e}")
         return None
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 def get_close(symbol, start, end):
@@ -273,26 +237,26 @@ def main():
         else:
             print(f"No data found for the specified date.")
 
-        # Qualify Divdata
+        # Plot Divdata
         if divData:
             df = pd.DataFrame(closeData)
             df['date'] = pd.to_datetime(df['date']).dt.date
             div_Dict = get_dividend(ticker, api_key)
             plot_stock_data(div_Dict, ticker)
 
-        # Qualify Standard Deviation
+        # Plot Standard Deviation
         if stand_data:
             plot_stock_data(stand_data, ticker)
 
 
-        # Qualify VolumeData
+        # Plot VolumeData
         if volumeData:
             df = pd.DataFrame(closeData)
             df['date'] = pd.to_datetime(df['date']).dt.date
             volume_Dict = volume_dictionary(df_filtered.to_dict('records'))
             plot_stock_data(volume_Dict, ticker)
 
-        # Qualify SP500Data
+        # Plot SP500Data
         if sp500Data:
             df = pd.DataFrame(sp500Data)
             df['date'] = pd.to_datetime(df['date']).dt.date
@@ -322,10 +286,6 @@ def main():
 
             # Thank-you message
             thank_you_message = "Thank you for using J&N Stock Analyze! We appreciate your business."
-
-            # Print the thank-you message before sending
-            print("Thank-You Message:")
-            print(thank_you_message)
 
             # Send thank-you message
             J_N_SMS.send_sms_via_email(number, thank_you_message, provider, sender_credentials)

@@ -1,12 +1,7 @@
-import email
 import smtplib
 import ssl
 from Providors import PROVIDERS
-from os.path import basename
-from email import encoders
-from email.mime.base import MIMEBase
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
+
 
 def send_sms_via_email(
     number: str,
@@ -38,11 +33,8 @@ def main():
     sender_credentials = ("jnstockanalyize@gmail.com", "tplr znil sobq eazj")
 
     try:
-        # SMS
         send_sms_via_email(number, message, provider, sender_credentials)
 
-        # Uncomment the following line to test sending a direct email to SMS gateway
-        # send_test_email_to_sms_gateway(number, message, provider)
     except Exception as e:
         print(f"An error occurred: {e}")
 
