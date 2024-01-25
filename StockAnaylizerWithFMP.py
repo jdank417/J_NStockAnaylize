@@ -1,4 +1,5 @@
 # API_Key: b5dd9bbe937d64ec8c81be6fb999a2ed
+# P14NGbV5bcU5qCi0XB9Sa435BGSPo9HM
 # @Author Jason Dank
 # @Author Nico Bonanno
 
@@ -13,8 +14,8 @@ import J_N_SMTP
 
 # Constants
 start_date = "2023-10-01"
-end_date = "2023-11-01"
-api_key = "b5dd9bbe937d64ec8c81be6fb999a2ed"
+end_date = "2024-11-01"
+api_key = "P14NGbV5bcU5qCi0XB9Sa435BGSPo9HM"
 ticker = input("Enter Stock Ticker: ")
 phoneNumber = input("Enter Phone Number: ")
 User_Start_Date = "2023-10-06"  # input("Enter Date of Purchase: ")
