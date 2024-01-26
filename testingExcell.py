@@ -14,7 +14,7 @@ ws = wb.active
 # Accessing and printing the value in cell B2
 cell_value = ws['A2'].value
 
-for row in ws.iter_rows(min_row=1, max_col=1, max_row=3, values_only=True):
+for row in ws.iter_rows(min_row=1, max_col=1, max_row=11, values_only=True):
     for cell in row:
         print(cell)
 
